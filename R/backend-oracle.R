@@ -59,7 +59,15 @@ sql_query_select.Oracle <- function(con,
     # Requires Oracle 12c, released in 2013
     limit =   if (!is.null(limit)) {
       limit <- as.integer(limit)
-      glue_sql2(con, "FETCH FIRST {limit} ROWS ONLY")
+	    if(as.numeric(substr(con@info$db.version,1,2))<12){
+		    if (!length(where) == 0) {
+			    build_sql("AND ROWNUM <=  ", limit,  con = con)
+		    } else {
+			    build_sql("WHERE ROWNUM <=  ", limit,  con = con)
+	      }
+	    }else{
+		    glue_sql2(con, "FETCH FIRST {limit} ROWS ONLY")
+	    }      
     },
     lvl = lvl
   )
